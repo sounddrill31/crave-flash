@@ -13,6 +13,7 @@ if [[ "$(uname)"!= "Linux" ]]; then
     curl -O https://dl.google.com/android/repository/platform-tools-latest-linux.zip
     unzip platform-tools-latest-linux.zip
     PLATFORMTOOLS="${pwd}/platform-tools"
+fi
 
 # Set up pmbootstrap
 #echo "Setting up pmbootstrap..."
