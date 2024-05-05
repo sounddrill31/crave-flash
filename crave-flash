@@ -8,7 +8,7 @@
 
 # Portable setup of adb and fastboot platform tools locally
 echo "Setting up adb and fastboot platform tools..."
-if [[ "$(uname)"!= "Linux" ]]; then
+if [[ "$(uname)"= "Linux" ]]; then
     echo "Downloading platform tools for linux"
     curl -O https://dl.google.com/android/repository/platform-tools-latest-linux.zip
     unzip platform-tools-latest-linux.zip
