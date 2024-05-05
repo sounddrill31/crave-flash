@@ -1,11 +1,5 @@
 #!/bin/bash
 
-# Check OS
-#if [[ "$(uname)"!= "Linux" ]]; then
-#    echo "This script is only compatible with Linux systems."
-#    exit 1
-#fi
-
 # Portable setup of adb and fastboot platform tools locally
 echo "Setting up adb and fastboot platform tools..."
 if [[ "$(uname)" == "Linux" ]]; then
