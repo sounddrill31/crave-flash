@@ -1,0 +1,73 @@
+#!/bin/bash
+
+# Check OS
+#if [[ "$(uname)"!= "Linux" ]]; then
+#    echo "This script is only compatible with Linux systems."
+#    exit 1
+#fi
+
+# Portable setup of adb and fastboot platform tools locally
+echo "Setting up adb and fastboot platform tools..."
+if [[ "$(uname)"!= "Linux" ]]; then
+    echo "Downloading platform tools for linux"
+    curl -O https://dl.google.com/android/repository/platform-tools-latest-linux.zip
+    unzip platform-tools-latest-linux.zip
+    PLATFORMTOOLS="${pwd}/platform-tools"
+
+# Set up pmbootstrap
+#echo "Setting up pmbootstrap..."
+
+
+# Run crave clone list and ask user for ProjectID and Project Folder
+echo "Running crave list..."
+crave list
+read -p "Please Enter your ProjectID: " PROJECTID
+read -p "Please enter the Project Folder (ensure it matches the build project): " PROJECTFOLDER
+
+# Find Project details
+PROJECT_SOURCE_URL=$(crave clone list --json | jq -r ".projects[] | select(.projectId == "$PROJECT_ID") |.sourceUrl")
+
+# Set Up Project
+mkdir -p $PROJECTFOLDER || true
+cd $PROJECTFOLDER
+repo init -u $PROJECT_SOURCE_URL || git clone $PROJECT_SOURCE_URL .
+
+# Take all arguments like crave-flash <mode> *
+MODE=$1
+FILENAME=$2
+shift
+ARGS=$@
+
+# Dummy switchcase to output color
+case $MODE in
+    #pmbootstrap)
+    #    ;;
+    adb)
+        crave pull $FILENAME
+        echo "Listing adb devices"
+        ./${PLATFORMTOOLS}/adb devices
+        echo "Running $ARGS with file $FILENAME"
+        ./${PLATFORMTOOLS}/adb $ARGS $FILENAME
+        ;;
+    fastboot)
+        crave pull $FILENAME
+        echo "Listing fastboot devices"
+        ./${PLATFORMTOOLS}/fastboot devices
+        echo "Running $ARGS with file $FILENAME"
+        ./${PLATFORMTOOLS}/fastboot $ARGS $FILENAME
+        ;;
+    heimdall)
+        if ! command -v heimdall &> /dev/null
+            echo "heimdall is not installed!"
+            exit 1
+        fi
+        echo "Checking if your connection is working. Device will restart if successful"
+        heimdall print-pit
+        echo "Flashing $FILENAME"
+        heimdall $ARGS
+        ;;
+    *)
+        echo "Invalid mode: $MODE"
+        exit 1
+        ;;
+esac
